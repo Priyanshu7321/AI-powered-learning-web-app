@@ -22,10 +22,6 @@ export default function ProgressPage() {
   const { data: gameProgress = [], isLoading: gameProgressLoading } = useQuery<GameProgress[]>({
     queryKey: ['/api/game-progress/all'],
     staleTime: 60000, // 1 minute
-    select: (data) => {
-      if (!data) return [];
-      return Array.isArray(data) ? data : [data];
-    }
   });
 
   const translations = {
@@ -70,17 +66,15 @@ export default function ProgressPage() {
   const t = translations[language];
 
   // Fallback data
-  const defaultProgress: UserProgress = {
+  const userProgress = progress || {
     id: 1,
     userId: 1,
-    todayStars: 15,
-    streak: 7,
-    wordsLearned: 32,
-    gamesCompleted: 12,
+    todayStars: 0,
+    streak: 0,
+    wordsLearned: 0,
+    gamesCompleted: 0,
     lastActive: new Date().toISOString()
   };
-
-  const userProgress = progress || defaultProgress;
   
   return (
     <div className="min-h-screen flex flex-col">
