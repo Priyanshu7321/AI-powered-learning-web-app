@@ -18,6 +18,21 @@ export default function ActiveGameSection({ game, onClose, language }: ActiveGam
   const [showSuccess, setShowSuccess] = useState(false);
   const [showTryAgain, setShowTryAgain] = useState(false);
   const [correctPhrases, setCorrectPhrases] = useState<number[]>([]);
+  const [skippedPhrases, setSkippedPhrases] = useState<number[]>([]);
+  const [timeSpent, setTimeSpent] = useState(0);
+  const [isActive, setIsActive] = useState(true);
+  
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isActive) {
+      interval = setInterval(() => {
+        setTimeSpent(time => time + 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive]);
   
   const currentPhrase = game.phrases[currentPhraseIndex];
   const phraseToRecognize = language === 'en' ? currentPhrase.text : currentPhrase.textHi;
@@ -107,9 +122,39 @@ export default function ActiveGameSection({ game, onClose, language }: ActiveGam
   };
 
   const skipPhrase = () => {
+    setSkippedPhrases(prev => [...prev, currentPhraseIndex]);
     if (currentPhraseIndex < game.phrases.length - 1) {
       setCurrentPhraseIndex(currentPhraseIndex + 1);
     }
+  };
+
+  const endGame = async () => {
+    setIsActive(false);
+    
+    // Calculate stats
+    const attemptsCount = correctPhrases.length + skippedPhrases.length;
+    const accuracy = (correctPhrases.length / game.phrases.length) * 100;
+    
+    // Update game progress
+    await fetch('/api/game-progress', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        gameId: game.id,
+        completed: true,
+        score: correctPhrases.length,
+        evaluation: `${correctPhrases.length}/${game.phrases.length} correct (${accuracy.toFixed(1)}%)`,
+        starsEarned: Math.ceil((correctPhrases.length / game.phrases.length) * 3),
+        wordsLearned: correctPhrases.length,
+        timeSpent,
+        attemptsCount,
+        skippedCount: skippedPhrases.length
+      })
+    });
+    
+    onClose();
   };
 
   const translations = {
@@ -212,6 +257,11 @@ export default function ActiveGameSection({ game, onClose, language }: ActiveGam
             </div>
             
             <div className="flex flex-wrap gap-4 justify-center">
+              <div className="w-full text-center mb-4">
+                <span className="text-xl font-bold">
+                  Time: {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
               <Button 
                 className="bg-accent hover:bg-opacity-80 transition text-dark font-bold py-3 px-6 rounded-full text-lg shadow flex items-center gap-2 h-auto"
                 onClick={playCurrentPhrase}
@@ -225,6 +275,13 @@ export default function ActiveGameSection({ game, onClose, language }: ActiveGam
               >
                 <i className="ri-skip-forward-line text-xl"></i>
                 {t.skip}
+              </Button>
+              <Button 
+                className="bg-red-500 hover:bg-red-600 transition text-white font-bold py-3 px-6 rounded-full text-lg shadow flex items-center gap-2 h-auto"
+                onClick={endGame}
+              >
+                <i className="ri-stop-circle-line text-xl"></i>
+                End Task
               </Button>
             </div>
           </div>
