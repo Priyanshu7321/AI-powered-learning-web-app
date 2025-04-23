@@ -15,7 +15,10 @@ export default function LoginPage() {
   const login = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) =>
       apiRequest('POST', '/api/auth/login', credentials),
-    onSuccess: () => setLocation('/')
+    onSuccess: (data) => {
+      localStorage.setItem('userToken', data.token);
+      setLocation('/');
+    }
   });
 
   return (

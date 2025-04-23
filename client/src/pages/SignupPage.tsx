@@ -17,7 +17,15 @@ export default function SignupPage() {
   const signup = useMutation({
     mutationFn: async (userData: any) =>
       apiRequest('POST', '/api/users', userData),
-    onSuccess: () => setLocation('/login')
+    onSuccess: async (data) => {
+      // Log in automatically after signup
+      const loginResponse = await apiRequest('POST', '/api/auth/login', { 
+        username, 
+        password 
+      });
+      localStorage.setItem('userToken', loginResponse.token);
+      setLocation('/');
+    }
   });
 
   return (

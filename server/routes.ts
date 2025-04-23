@@ -23,7 +23,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      res.json({ user });
+      // Return user data without password
+      const { password: _, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword, token: 'user_' + user.id });
     } catch (error) {
       res.status(500).json({ message: "Login failed" });
     }
