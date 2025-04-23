@@ -26,17 +26,18 @@ function Router() {
   
   return (
     <Switch>
-      <Route path="/login" component={LoginPage} />
-      <Route path="/signup" component={SignupPage} />
       {token ? (
         <>
-          <Route path="/" component={Home} />
           <Route path="/game/:gameId" component={GamePage} />
           <Route path="/progress" component={ProgressPage} />
           <Route path="/parent-dashboard" component={ParentDashboard} />
+          <Route path="/" component={Home} />
         </>
       ) : (
-        <Route path="/" component={LoginPage} />
+        <>
+          <Route path="/signup" component={SignupPage} />
+          <Route path="/" component={LoginPage} />
+        </>
       )}
     </Switch>
   );
