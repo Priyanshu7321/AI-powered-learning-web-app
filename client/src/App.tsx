@@ -7,10 +7,14 @@ import Home from "@/pages/Home";
 import GamePage from "@/pages/GamePage";
 import ProgressPage from "@/pages/ProgressPage";
 import ParentDashboard from "@/pages/ParentDashboard";
+import LoginPage from "@/pages/LoginPage";
+import SignupPage from "@/pages/SignupPage";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/login" component={LoginPage} />
+      <Route path="/signup" component={SignupPage} />
       <Route path="/" component={Home} />
       <Route path="/game/:gameId" component={GamePage} />
       <Route path="/progress" component={ProgressPage} />

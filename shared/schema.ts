@@ -67,3 +67,17 @@ export type GameProgress = typeof gameProgress.$inferSelect;
 
 export type InsertSpeechAttempt = z.infer<typeof insertSpeechAttemptSchema>;
 export type SpeechAttempt = typeof speechAttempts.$inferSelect;
+
+// Test Results table schema
+export const testResults = pgTable("test_results", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  testName: text("test_name").notNull(),
+  score: integer("score").notNull(),
+  maxScore: integer("max_score").notNull(),
+  completedAt: timestamp("completed_at").defaultNow(),
+});
+
+export const insertTestResultSchema = createInsertSchema(testResults).omit({ id: true, completedAt: true });
+export type InsertTestResult = z.infer<typeof insertTestResultSchema>;
+export type TestResult = typeof testResults.$inferSelect;

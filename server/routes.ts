@@ -12,6 +12,24 @@ import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
+
+  // Auth routes
+  app.post("/api/auth/login", async (req: Request, res: Response) => {
+    try {
+      const { username, password } = req.body;
+      const user = await storage.getUserByUsername(username);
+      
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      res.json({ user });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+
   app.get("/api/health", (req: Request, res: Response) => {
     res.json({ status: "ok" });
   });
