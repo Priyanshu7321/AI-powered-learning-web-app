@@ -210,6 +210,22 @@ export default function ProgressPage() {
                             {progress?.bestScore || 0} points
                           </span>
                         </div>
+                        {progress?.lastEvaluation && (
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-600">Last Evaluation:</span>
+                            <span className="font-bold" style={{ color: game.color }}>
+                              {progress.lastEvaluation}
+                            </span>
+                          </div>
+                        )}
+                        {progress?.lastAttemptDate && (
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-600">Last Attempt:</span>
+                            <span className="font-bold" style={{ color: game.color }}>
+                              {new Date(progress.lastAttemptDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
                         <Link href={`/game/${game.id}`}>
                           <Button 
                             className="w-full mt-4 text-white"

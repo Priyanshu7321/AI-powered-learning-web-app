@@ -34,6 +34,8 @@ export const gameProgress = pgTable("game_progress", {
   timesCompleted: integer("times_completed").default(0),
   bestScore: integer("best_score").default(0),
   lastPlayed: timestamp("last_played").defaultNow(),
+  lastEvaluation: text("last_evaluation"),
+  lastAttemptDate: timestamp("last_attempt_date"),
 });
 
 // Speech Recognition Attempt table schema

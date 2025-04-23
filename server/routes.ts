@@ -164,7 +164,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updateData = {
           timesPlayed: (progress.timesPlayed || 0) + 1,
           timesCompleted: data.completed ? (progress.timesCompleted || 0) + 1 : (progress.timesCompleted || 0),
-          bestScore: data.score && progress.bestScore ? (data.score > progress.bestScore ? data.score : progress.bestScore) : (data.score || progress.bestScore || 0)
+          bestScore: data.score && progress.bestScore ? (data.score > progress.bestScore ? data.score : progress.bestScore) : (data.score || progress.bestScore || 0),
+          lastEvaluation: data.evaluation || null,
+          lastAttemptDate: new Date().toISOString()
         };
         
         progress = await storage.updateGameProgress(userId, gameId, updateData);
