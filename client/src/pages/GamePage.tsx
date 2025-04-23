@@ -41,6 +41,10 @@ export default function GamePage() {
   });
   
   const handleCloseGame = () => {
+    // Invalidate queries to refresh progress data
+    queryClient.invalidateQueries({ queryKey: ['/api/game-progress'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/game-progress/all'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
     setLocation('/');
   };
   

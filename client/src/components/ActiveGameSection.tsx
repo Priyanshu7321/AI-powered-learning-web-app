@@ -61,6 +61,29 @@ export default function ActiveGameSection({ game, onClose, language }: ActiveGam
       setTimeout(() => {
         setShowTryAgain(false);
       }, 2000);
+      
+      // Check if this was the last phrase
+      if (currentPhraseIndex === game.phrases.length - 1) {
+        // Update game progress
+        fetch('/api/game-progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            gameId: game.id,
+            completed: true,
+            score: correctPhrases.length,
+            evaluation: `${correctPhrases.length}/${game.phrases.length} phrases correct`,
+            starsEarned: Math.ceil((correctPhrases.length / game.phrases.length) * 3),
+            wordsLearned: correctPhrases.length
+          })
+        });
+        
+        setTimeout(() => {
+          onClose();
+        }, 3000);
+      }
     }
   };
 
