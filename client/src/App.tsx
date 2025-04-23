@@ -17,16 +17,18 @@ function Router() {
   
   useEffect(() => {
     const token = localStorage.getItem('userToken');
-    if (!token && location !== '/signup') {
+    if (!token && location !== '/signup' && location !== '/login') {
       setLocation('/login');
     }
-  }, []);
+  }, [location]);
 
+  const token = localStorage.getItem('userToken');
+  
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
       <Route path="/signup" component={SignupPage} />
-      {localStorage.getItem('userToken') ? (
+      {token ? (
         <>
           <Route path="/" component={Home} />
           <Route path="/game/:gameId" component={GamePage} />
@@ -34,7 +36,7 @@ function Router() {
           <Route path="/parent-dashboard" component={ParentDashboard} />
         </>
       ) : (
-        <Route component={LoginPage} />
+        <Route path="/" component={LoginPage} />
       )}
     </Switch>
   );
