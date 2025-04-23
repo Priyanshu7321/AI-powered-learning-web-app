@@ -22,6 +22,7 @@ export default function ProgressPage() {
   const { data: gameProgress = [], isLoading: gameProgressLoading } = useQuery<GameProgress[]>({
     queryKey: ['/api/game-progress/all'],
     staleTime: 60000, // 1 minute
+    select: (data) => Array.isArray(data) ? data : [data], // Ensure data is always an array
   });
 
   const translations = {
