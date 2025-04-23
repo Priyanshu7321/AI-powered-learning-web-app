@@ -204,7 +204,7 @@ export default function ProgressPage() {
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-600">{t.completed}:</span>
                           <span className="font-bold" style={{ color: game.color }}>
-                            {progress?.timesCompleted || 0} timesimesCompleted || 0} times
+                            {progress?.timesCompleted || 0} times
                           </span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
