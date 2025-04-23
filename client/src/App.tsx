@@ -16,24 +16,26 @@ function Router() {
   const [location, setLocation] = useLocation();
   
   useEffect(() => {
-    // Check if user is not logged in and trying to access protected routes
-    const isProtectedRoute = !['/login', '/signup'].includes(location);
     const token = localStorage.getItem('userToken');
-    
-    if (isProtectedRoute && !token) {
+    if (!token && location !== '/signup') {
       setLocation('/login');
     }
-  }, [location]);
+  }, []);
 
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
       <Route path="/signup" component={SignupPage} />
-      <Route path="/" component={Home} />
-      <Route path="/game/:gameId" component={GamePage} />
-      <Route path="/progress" component={ProgressPage} />
-      <Route path="/parent-dashboard" component={ParentDashboard} />
-      <Route component={NotFound} />
+      {localStorage.getItem('userToken') ? (
+        <>
+          <Route path="/" component={Home} />
+          <Route path="/game/:gameId" component={GamePage} />
+          <Route path="/progress" component={ProgressPage} />
+          <Route path="/parent-dashboard" component={ParentDashboard} />
+        </>
+      ) : (
+        <Route component={LoginPage} />
+      )}
     </Switch>
   );
 }
