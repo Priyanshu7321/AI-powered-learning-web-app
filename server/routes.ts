@@ -135,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real app, we would get the user ID from the session
       const userId = 1; // Mock user ID for demo
       const progress = await storage.getAllGameProgress(userId);
-      res.json(progress);
+      res.json(Array.isArray(progress) ? progress : []);
     } catch (error) {
       res.status(500).json({ message: "Failed to retrieve all game progress" });
     }
