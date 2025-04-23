@@ -13,31 +13,30 @@ import SignupPage from "@/pages/SignupPage";
 import { useEffect } from "react";
 
 function Router() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   
   useEffect(() => {
     const token = localStorage.getItem('userToken');
-    if (!token && location !== '/signup' && location !== '/login') {
+    const currentPath = window.location.pathname;
+    
+    if (!token && currentPath !== '/signup' && currentPath !== '/login') {
       setLocation('/login');
     }
-  }, [location]);
+  }, []);
 
-  const token = localStorage.getItem('userToken');
-  
   return (
     <Switch>
-      {token ? (
+      <Route path="/signup" component={SignupPage} />
+      <Route path="/login" component={LoginPage} />
+      {localStorage.getItem('userToken') ? (
         <>
           <Route path="/game/:gameId" component={GamePage} />
           <Route path="/progress" component={ProgressPage} />
           <Route path="/parent-dashboard" component={ParentDashboard} />
-          <Route path="/" component={Home} />
+          <Route exact path="/" component={Home} />
         </>
       ) : (
-        <>
-          <Route path="/signup" component={SignupPage} />
-          <Route path="/" component={LoginPage} />
-        </>
+        <Route component={LoginPage} />
       )}
     </Switch>
   );
