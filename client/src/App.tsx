@@ -13,27 +13,31 @@ import SignupPage from "@/pages/SignupPage";
 import { useEffect } from "react";
 
 function Router() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   
   useEffect(() => {
-    // Check if user is not logged in and trying to access protected routes
-    const isProtectedRoute = !['/login', '/signup'].includes(location);
     const token = localStorage.getItem('userToken');
+    const currentPath = window.location.pathname;
     
-    if (isProtectedRoute && !token) {
+    if (!token && currentPath !== '/signup' && currentPath !== '/login') {
       setLocation('/login');
     }
-  }, [location]);
+  }, []);
 
   return (
     <Switch>
-      <Route path="/login" component={LoginPage} />
       <Route path="/signup" component={SignupPage} />
-      <Route path="/" component={Home} />
-      <Route path="/game/:gameId" component={GamePage} />
-      <Route path="/progress" component={ProgressPage} />
-      <Route path="/parent-dashboard" component={ParentDashboard} />
-      <Route component={NotFound} />
+      <Route path="/login" component={LoginPage} />
+      {localStorage.getItem('userToken') ? (
+        <>
+          <Route path="/game/:gameId" component={GamePage} />
+          <Route path="/progress" component={ProgressPage} />
+          <Route path="/parent-dashboard" component={ParentDashboard} />
+          <Route exact path="/" component={Home} />
+        </>
+      ) : (
+        <Route component={LoginPage} />
+      )}
     </Switch>
   );
 }

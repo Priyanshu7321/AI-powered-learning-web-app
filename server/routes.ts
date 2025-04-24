@@ -157,15 +157,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           gameId,
           timesPlayed: 1,
           timesCompleted: data.completed ? 1 : 0,
-          bestScore: data.score || 0
+          bestScore: data.score || 0,
+          lastEvaluation: data.evaluation || null,
+          lastAttemptDate: new Date().toISOString()
         });
       } else {
         // Update existing game progress
         const updateData = {
-          timesPlayed: (progress.timesPlayed || 0) + 1,
-          timesCompleted: data.completed ? (progress.timesCompleted || 0) + 1 : (progress.timesCompleted || 0),
-          bestScore: data.score && progress.bestScore ? (data.score > progress.bestScore ? data.score : progress.bestScore) : (data.score || progress.bestScore || 0),
-          lastEvaluation: data.evaluation || null,
+          timesPlayed: progress.timesPlayed + 1,
+          timesCompleted: data.completed ? progress.timesCompleted + 1 : progress.timesCompleted,
+          bestScore: data.score > (progress.bestScore || 0) ? data.score : progress.bestScore,
+          lastEvaluation: data.evaluation || progress.lastEvaluation,
           lastAttemptDate: new Date().toISOString()
         };
         
