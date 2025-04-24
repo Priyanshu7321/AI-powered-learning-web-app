@@ -1,3 +1,15 @@
+
+function concatenateFloat32Arrays(arrays: Float32Array[]): Float32Array {
+  const totalLength = arrays.reduce((acc, arr) => acc + arr.length, 0);
+  const result = new Float32Array(totalLength);
+  let offset = 0;
+  for (const arr of arrays) {
+    result.set(arr, offset);
+    offset += arr.length;
+  }
+  return result;
+}
+
 // This function would play audio in a real implementation
 // For this demo, we're simulating audio playback
 export const playAudio = (audioId: string): void => {

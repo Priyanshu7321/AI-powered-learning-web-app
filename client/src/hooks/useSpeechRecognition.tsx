@@ -50,7 +50,10 @@ interface SpeechRecognition extends EventTarget {
 }
 
 // Get the browser's SpeechRecognition constructor
-const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+import { transcribeAudio } from '../lib/wav2vec2Utils';
+
+// Fallback to browser's SpeechRecognition if wav2vec2 fails
+const BrowserSpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 export default function useSpeechRecognition({ 
   language = 'en'
@@ -66,10 +69,31 @@ export default function useSpeechRecognition({
       return;
     }
 
-    const recognitionInstance = new SpeechRecognition();
-    recognitionInstance.continuous = false;
-    recognitionInstance.interimResults = true;
-    recognitionInstance.lang = language === 'en' ? 'en-US' : 'hi-IN';
+    const audioContext = new AudioContext();
+    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const source = audioContext.createMediaStreamSource(mediaStream);
+    const processor = audioContext.createScriptProcessor(4096, 1, 1);
+    const audioChunks: Float32Array[] = [];
+
+    processor.onaudioprocess = async (e) => {
+      const inputData = e.inputBuffer.getChannelData(0);
+      audioChunks.push(new Float32Array(inputData));
+      
+      if (audioChunks.length > 10) { // Process every ~2 seconds
+        const concatenated = concatenateFloat32Arrays(audioChunks);
+        try {
+          const transcription = await transcribeAudio(concatenated);
+          setTranscript(transcription);
+        } catch (error) {
+          // Fallback to browser's SpeechRecognition
+          const recognitionInstance = new BrowserSpeechRecognition();
+          recognitionInstance.continuous = false;
+          recognitionInstance.interimResults = true;
+          recognitionInstance.lang = language === 'en' ? 'en-US' : 'hi-IN';
+        }
+        audioChunks.length = 0;
+      }
+    };
     
     recognitionInstance.onstart = () => {
       setListening(true);
