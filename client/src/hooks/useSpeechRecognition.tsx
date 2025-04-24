@@ -69,11 +69,12 @@ export default function useSpeechRecognition({
       return;
     }
 
-    const audioContext = new AudioContext();
-    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const source = audioContext.createMediaStreamSource(mediaStream);
-    const processor = audioContext.createScriptProcessor(4096, 1, 1);
-    const audioChunks: Float32Array[] = [];
+    const setupAudio = async () => {
+      const audioContext = new AudioContext();
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const source = audioContext.createMediaStreamSource(mediaStream);
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      const audioChunks: Float32Array[] = [];
 
     processor.onaudioprocess = async (e) => {
       const inputData = e.inputBuffer.getChannelData(0);
@@ -124,6 +125,8 @@ export default function useSpeechRecognition({
     };
     
     setRecognition(recognitionInstance);
+    
+    setupAudio().catch(console.error);
 
     return () => {
       if (recognitionInstance && listening) {
