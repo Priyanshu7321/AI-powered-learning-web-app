@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +22,9 @@ export default function SignupPage() {
         username, 
         password 
       });
-      localStorage.setItem('userToken', loginResponse.token);
+      const loginData = await loginResponse.json();
+      localStorage.setItem('userToken', loginData.token);
+      localStorage.setItem('userName', name);
       setLocation('/');
     }
   });

@@ -28,11 +28,13 @@ export default function ActiveGameSection({ game, language, onComplete }: Active
       const timeSpent = Math.floor((Date.now() - startTime) / 1000); // Convert to seconds
       const accuracy = (score / game.phrases.length) * 100;
       const starsEarned = Math.ceil((score / game.phrases.length) * 3);
+      const token = localStorage.getItem('userToken');
 
       const response = await fetch('/api/game-progress', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           gameId: game.id,

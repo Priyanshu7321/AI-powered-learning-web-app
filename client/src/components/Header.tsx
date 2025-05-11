@@ -14,8 +14,16 @@ interface HeaderProps {
 }
 
 export default function Header({ userName = "Lily", language, onLanguageChange }: HeaderProps) {
-  const [location] = useLocation();
-  
+  const [location, setLocation] = useLocation();
+  // Get userName from localStorage if not provided
+  const name = userName || localStorage.getItem('userName') || 'User';
+
+  const handleLogout = () => {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userName');
+    setLocation('/login');
+  };
+
   return (
     <header className="bg-primary shadow-md">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -27,18 +35,41 @@ export default function Header({ userName = "Lily", language, onLanguageChange }
         </Link>
         
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="text-white hover:text-accent hover:bg-transparent transition" aria-label="Settings">
-            <i className="ri-settings-3-line text-2xl"></i>
-          </Button>
-          
+          {/* Settings Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:text-accent hover:bg-transparent transition"
+                aria-label="Settings"
+              >
+                <i className="ri-settings-3-line text-2xl"></i>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <div className="px-4 py-3 border-b flex items-center gap-2">
+                <Avatar className="w-8 h-8 border-2 border-accent">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="bg-accent text-dark">{name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="font-bold">{name}</span>
+              </div>
+              <DropdownMenuItem onClick={handleLogout}>
+                🚪 Log out
+              </DropdownMenuItem>
+              {/* Add more settings here if needed */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {/* User Avatar and Name */}
           <div className="flex items-center gap-2 bg-white bg-opacity-20 rounded-full px-4 py-2">
             <Avatar className="w-8 h-8 border-2 border-accent">
               <AvatarImage src="" />
-              <AvatarFallback className="bg-accent text-dark">{userName.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="bg-accent text-dark">{name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <span className="text-white font-medium hidden md:inline">{userName}</span>
+            <span className="text-white font-medium hidden md:inline">{name}</span>
           </div>
-          
+          {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 

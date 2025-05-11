@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -11,6 +11,14 @@ import { games } from '@/lib/gameData';
 
 export default function ProgressPage() {
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    if (name) {
+      setUserName(name);
+    }
+  }, []);
 
   // Fetch user progress from API
   const { data: progress, isLoading: progressLoading } = useQuery<UserProgress>({
@@ -74,12 +82,13 @@ export default function ProgressPage() {
     streak: 0,
     wordsLearned: 0,
     gamesCompleted: 0,
-    lastActive: new Date()
+    lastActive: new Date().toISOString()
   };
   
   return (
     <div className="min-h-screen flex flex-col">
       <Header
+        userName={userName}
         language={language}
         onLanguageChange={setLanguage}
       />
@@ -161,7 +170,7 @@ export default function ProgressPage() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <p className="text-xl font-bold text-green">
-                    {new Date(userProgress.lastActive).toLocaleDateString()}
+                    {new Date(userProgress.lastActive || new Date()).toLocaleDateString()}
                   </p>
                 </CardContent>
               </Card>
@@ -198,28 +207,22 @@ export default function ProgressPage() {
                       <CardContent className="pt-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-600">{t.completed}:</span>
-                          <span className="font-bold" style={{ color: game.color }}>
-                            {progress?.timesCompleted || 0} times
-                          </span>
+                          <span className="font-semibold">{progress?.timesCompleted || 0} times</span>
                         </div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-gray-600">{t.bestScore}:</span>
-                          <span className="font-bold" style={{ color: game.color }}>
-                            {progress?.bestScore || 0} points
-                          </span>
+                          <span className="font-semibold">{progress?.bestScore || 0} points</span>
                         </div>
                         {progress?.lastEvaluation && (
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-gray-600">Last Evaluation:</span>
-                            <span className="font-bold" style={{ color: game.color }}>
-                              {progress.lastEvaluation}
-                            </span>
+                            <span className="font-semibold">{progress.lastEvaluation}</span>
                           </div>
                         )}
                         {progress?.lastAttemptDate && (
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-gray-600">Last Attempt:</span>
-                            <span className="font-bold" style={{ color: game.color }}>
+                            <span className="font-semibold">
                               {new Date(progress.lastAttemptDate).toLocaleDateString()}
                             </span>
                           </div>
