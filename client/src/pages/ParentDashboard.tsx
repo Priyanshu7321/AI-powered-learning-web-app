@@ -6,16 +6,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
-import { UserProgress } from '@shared/schema';
+import { apiRequest } from '@/lib/queryClient';
+import { UserProgress, GameProgress } from '@shared/schema';
 
 export default function ParentDashboard() {
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
 
-  // Fetch user progress from API
-  const { data: progress, isLoading } = useQuery<UserProgress>({
+  // Fetch user progress
+  const { data: progress } = useQuery<UserProgress>({
     queryKey: ['/api/progress'],
     staleTime: 60000, // 1 minute
   });
+
+  // Fetch game progress for all games
+  const { data: gameProgress = [], isLoading: gameProgressLoading } = useQuery<GameProgress[]>({
+    queryKey: ['/api/game-progress/all'],
+    staleTime: 60000, // 1 minute
+    select: (data) => Array.isArray(data) ? data : [data]
+  });
+
+  // Calculate total learning time (assuming each game takes 5 minutes)
+  const totalLearningTime = Array.isArray(gameProgress) 
+    ? gameProgress.reduce((total, game) => total + (game.timesPlayed || 0) * 5, 0)
+    : 0;
+
+  // Calculate weekly progress
+  const weeklyProgress = Array(7).fill(0).map((_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    return {
+      day: date.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0),
+      minutes: 0 // Initialize with 0 instead of random data
+    };
+  }).reverse();
 
   const translations = {
     en: {
@@ -54,15 +77,15 @@ export default function ParentDashboard() {
 
   const t = translations[language];
 
-  // Fallback data
+  // Fallback data with all values set to 0
   const defaultProgress: UserProgress = {
     id: 1,
     userId: 1,
-    todayStars: 15,
-    streak: 7,
-    wordsLearned: 32,
-    gamesCompleted: 12,
-    lastActive: new Date().toISOString()
+    todayStars: 0,
+    streak: 0,
+    wordsLearned: 0,
+    gamesCompleted: 0,
+    lastActive: new Date()
   };
 
   const userProgress = progress || defaultProgress;
@@ -114,7 +137,7 @@ export default function ParentDashboard() {
                   <div className="flex justify-between items-center">
                     <span>Last Active:</span>
                     <span className="font-bold text-green">
-                      {new Date(userProgress.lastActive).toLocaleDateString()}
+                      {userProgress.lastActive?.toLocaleDateString() || 'Never'}
                     </span>
                   </div>
                 </CardContent>
@@ -127,20 +150,24 @@ export default function ParentDashboard() {
                 <CardContent className="pt-4">
                   <div className="flex items-center justify-center">
                     <div className="text-center">
-                      <p className="text-5xl font-bold text-secondary">35</p>
-                      <p className="text-lg text-gray-600">{t.minutes}</p>
+                      <p className="text-5xl font-bold text-secondary">
+                        {totalLearningTime}
+                      </p>
+                      <p className="text-lg text-gray-600">
+                        {language === 'en' ? 'minutes' : 'मिनट'}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-4">
                     <p className="text-sm text-gray-600">{t.thisWeek}:</p>
                     <div className="flex justify-between mt-2">
-                      {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
+                      {weeklyProgress.map((day, i) => (
                         <div key={i} className="flex flex-col items-center">
                           <div 
                             className="w-8 bg-secondary" 
-                            style={{ height: `${Math.floor(Math.random() * 50) + 10}px` }}
+                            style={{ height: `${(day.minutes / 30) * 100}px` }}
                           ></div>
-                          <span className="text-xs mt-1">{day}</span>
+                          <span className="text-xs mt-1">{day.day}</span>
                         </div>
                       ))}
                     </div>
@@ -158,15 +185,15 @@ export default function ParentDashboard() {
                   <ul className="space-y-2">
                     <li className="flex justify-between items-center">
                       <span>Animal Names</span>
-                      <span className="font-bold text-accent">★★★★☆</span>
+                      <span className="font-bold text-accent">☆☆☆☆☆</span>
                     </li>
                     <li className="flex justify-between items-center">
                       <span>Colors</span>
-                      <span className="font-bold text-accent">★★★★★</span>
+                      <span className="font-bold text-accent">☆☆☆☆☆</span>
                     </li>
                     <li className="flex justify-between items-center">
                       <span>Numbers</span>
-                      <span className="font-bold text-accent">★★★★☆</span>
+                      <span className="font-bold text-accent">☆☆☆☆☆</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -180,11 +207,11 @@ export default function ParentDashboard() {
                   <ul className="space-y-2">
                     <li className="flex justify-between items-center">
                       <span>Complex Sentences</span>
-                      <span className="font-bold text-primary">★★☆☆☆</span>
+                      <span className="font-bold text-primary">☆☆☆☆☆</span>
                     </li>
                     <li className="flex justify-between items-center">
                       <span>Pronouns</span>
-                      <span className="font-bold text-primary">★★★☆☆</span>
+                      <span className="font-bold text-primary">☆☆☆☆☆</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -198,8 +225,7 @@ export default function ParentDashboard() {
                 </CardHeader>
                 <CardContent className="pt-4">
                   <p className="text-gray-600 mb-4">
-                    Lily is making excellent progress! She has been consistent with her daily learning activities and 
-                    has shown significant improvement in vocabulary recognition.
+                    No progress data available yet. Start learning to see your progress!
                   </p>
                   <Button className="bg-purple text-white">
                     <i className="ri-download-line mr-2"></i>
@@ -215,7 +241,7 @@ export default function ParentDashboard() {
               <CardContent className="py-8 text-center">
                 <h3 className="text-2xl font-bold mb-4">Activity Tracking</h3>
                 <p className="text-gray-500 mb-4">
-                  Detailed activity tracking will be available soon. Check back for updates!
+                  No activity data available yet. Start learning to track your progress!
                 </p>
               </CardContent>
             </Card>

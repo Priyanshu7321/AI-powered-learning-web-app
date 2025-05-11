@@ -1,36 +1,17 @@
 // No imports needed
 
-export interface Phrase {
-  id: number;
-  text: string;  // English text
-  textHi: string;  // Hindi text
-  audioUrl?: string;
-}
-
-export interface Game {
-  id: string;
-  name: string;
-  nameHi: string;
-  description: string;
-  descriptionHi: string;
-  icon: string;
-  level: number;
-  duration: number;
-  color: string;
-  phrases: Phrase[];
-}
+import { Game, Phrase } from '@shared/schema';
 
 export const games: Game[] = [
   {
-    id: "wordMatch",
-    name: "Word Match",
-    nameHi: "शब्द मिलान",
-    description: "Listen to the word and select the matching picture!",
-    descriptionHi: "शब्द सुनें और मिलती हुई तस्वीर चुनें!",
-    icon: "FileText",
-    level: 2,
-    duration: 5,
-    color: "#FF6B6B",
+    id: 'wordMatch',
+    name: 'Word Match',
+    nameHi: 'शब्द मिलान',
+    description: 'Match words with their meanings',
+    descriptionHi: 'शब्दों को उनके अर्थ से मिलाएं',
+    level: 1,
+    color: '#4CAF50',
+    icon: 'ri-book-open-line',
     phrases: [
       { id: 1, text: "apple", textHi: "सेब" },
       { id: 2, text: "dog", textHi: "कुत्ता" },
@@ -40,15 +21,14 @@ export const games: Game[] = [
     ]
   },
   {
-    id: "speakRepeat",
-    name: "Speak & Repeat",
-    nameHi: "बोलो और दोहराओ",
-    description: "Listen to the phrase and try to repeat it correctly!",
-    descriptionHi: "वाक्यांश सुनें और इसे सही ढंग से दोहराने का प्रयास करें!",
-    icon: "Mic",
-    level: 1,
-    duration: 8,
-    color: "#4ECDC4",
+    id: 'sentenceBuilder',
+    name: 'Sentence Builder',
+    nameHi: 'वाक्य बनाना',
+    description: 'Build sentences from given words',
+    descriptionHi: 'दिए गए शब्दों से वाक्य बनाएं',
+    level: 2,
+    color: '#2196F3',
+    icon: 'ri-file-text-line',
     phrases: [
       { id: 1, text: "I see a red apple", textHi: "मुझे एक लाल सेब दिखता है" },
       { id: 2, text: "The dog is running", textHi: "कुत्ता दौड़ रहा है" },
@@ -58,21 +38,176 @@ export const games: Game[] = [
     ]
   },
   {
-    id: "storyTime",
-    name: "Story Time",
-    nameHi: "कहानी का समय",
-    description: "Listen to a story and answer questions with your voice!",
-    descriptionHi: "एक कहानी सुनें और अपनी आवाज से प्रश्नों के उत्तर दें!",
-    icon: "BookOpen",
+    id: 'speechPractice',
+    name: 'Speech Practice',
+    nameHi: 'बोलने का अभ्यास',
+    description: 'Practice speaking words and phrases',
+    descriptionHi: 'शब्दों और वाक्यांशों को बोलने का अभ्यास करें',
     level: 3,
-    duration: 10,
-    color: "#6A2C70",
+    color: '#9C27B0',
+    icon: 'ri-mic-line',
     phrases: [
-      { id: 1, text: "Once upon a time, there was a little rabbit", textHi: "एक समय की बात है, एक छोटा खरगोश था" },
-      { id: 2, text: "The rabbit liked to hop and play", textHi: "खरगोश कूदना और खेलना पसंद करता था" },
-      { id: 3, text: "One day, he met a friendly turtle", textHi: "एक दिन, वह एक मित्रवत कछुए से मिला" },
-      { id: 4, text: "They became good friends", textHi: "वे अच्छे दोस्त बन गए" },
-      { id: 5, text: "They played together every day", textHi: "वे हर दिन साथ खेलते थे" }
+      { id: 1, text: "Hello, my name is", textHi: "नमस्ते, मेरा नाम है" },
+      { id: 2, text: "I am learning English", textHi: "मैं अंग्रेजी सीख रहा हूं" },
+      { id: 3, text: "Today is a sunny day", textHi: "आज धूप का दिन है" },
+      { id: 4, text: "I like to play games", textHi: "मुझे खेल खेलना पसंद है" },
+      { id: 5, text: "Thank you for teaching me", textHi: "मुझे सिखाने के लिए धन्यवाद" }
+    ]
+  },
+  // New Math Games
+  {
+    id: 'numberCounting',
+    name: 'Number Counting',
+    nameHi: 'संख्या गिनती',
+    description: 'Learn to count numbers and basic addition',
+    descriptionHi: 'संख्याओं को गिनना और बुनियादी जोड़ सीखें',
+    level: 1,
+    color: '#FF9800',
+    icon: 'ri-numbers-line',
+    phrases: [
+      { id: 1, text: "one", textHi: "एक" },
+      { id: 2, text: "two", textHi: "दो" },
+      { id: 3, text: "three", textHi: "तीन" },
+      { id: 4, text: "four", textHi: "चार" },
+      { id: 5, text: "five", textHi: "पांच" }
+    ]
+  },
+  {
+    id: 'shapeMatch',
+    name: 'Shape Match',
+    nameHi: 'आकार मिलान',
+    description: 'Match shapes and learn their names',
+    descriptionHi: 'आकारों को मिलाएं और उनके नाम सीखें',
+    level: 1,
+    color: '#E91E63',
+    icon: 'ri-shape-line',
+    phrases: [
+      { id: 1, text: "circle", textHi: "वृत्त" },
+      { id: 2, text: "square", textHi: "वर्ग" },
+      { id: 3, text: "triangle", textHi: "त्रिभुज" },
+      { id: 4, text: "rectangle", textHi: "आयत" },
+      { id: 5, text: "star", textHi: "तारा" }
+    ]
+  },
+  {
+    id: 'simpleAddition',
+    name: 'Simple Addition',
+    nameHi: 'सरल जोड़',
+    description: 'Practice basic addition with visual aids',
+    descriptionHi: 'दृश्य सहायता के साथ बुनियादी जोड़ का अभ्यास करें',
+    level: 2,
+    color: '#FF5722',
+    icon: 'ri-add-line',
+    phrases: [
+      { id: 1, text: "one plus one equals two", textHi: "एक जमा एक बराबर दो" },
+      { id: 2, text: "two plus two equals four", textHi: "दो जमा दो बराबर चार" },
+      { id: 3, text: "three plus one equals four", textHi: "तीन जमा एक बराबर चार" },
+      { id: 4, text: "two plus three equals five", textHi: "दो जमा तीन बराबर पांच" },
+      { id: 5, text: "one plus four equals five", textHi: "एक जमा चार बराबर पांच" }
+    ]
+  },
+  // New EVS Games
+  {
+    id: 'animalSounds',
+    name: 'Animal Sounds',
+    nameHi: 'पशु ध्वनियां',
+    description: 'Learn animal names and their sounds',
+    descriptionHi: 'पशुओं के नाम और उनकी ध्वनियां सीखें',
+    level: 1,
+    color: '#795548',
+    icon: 'ri-volume-up-line',
+    phrases: [
+      { id: 1, text: "dog barks", textHi: "कुत्ता भौंकता है" },
+      { id: 2, text: "cat meows", textHi: "बिल्ली म्याऊं करती है" },
+      { id: 3, text: "cow moos", textHi: "गाय रंभाती है" },
+      { id: 4, text: "lion roars", textHi: "शेर दहाड़ता है" },
+      { id: 5, text: "bird chirps", textHi: "पक्षी चहकता है" }
+    ]
+  },
+  {
+    id: 'plantParts',
+    name: 'Plant Parts',
+    nameHi: 'पौधों के भाग',
+    description: 'Learn about different parts of plants',
+    descriptionHi: 'पौधों के विभिन्न भागों के बारे में जानें',
+    level: 2,
+    color: '#8BC34A',
+    icon: 'ri-plant-line',
+    phrases: [
+      { id: 1, text: "root", textHi: "जड़" },
+      { id: 2, text: "stem", textHi: "तना" },
+      { id: 3, text: "leaf", textHi: "पत्ता" },
+      { id: 4, text: "flower", textHi: "फूल" },
+      { id: 5, text: "fruit", textHi: "फल" }
+    ]
+  },
+  {
+    id: 'weatherMatch',
+    name: 'Weather Match',
+    nameHi: 'मौसम मिलान',
+    description: 'Learn about different weather conditions',
+    descriptionHi: 'विभिन्न मौसम की स्थितियों के बारे में जानें',
+    level: 2,
+    color: '#03A9F4',
+    icon: 'ri-sun-line',
+    phrases: [
+      { id: 1, text: "sunny day", textHi: "धूप का दिन" },
+      { id: 2, text: "rainy day", textHi: "बारिश का दिन" },
+      { id: 3, text: "cloudy day", textHi: "बादलों का दिन" },
+      { id: 4, text: "windy day", textHi: "हवादार दिन" },
+      { id: 5, text: "snowy day", textHi: "बर्फीला दिन" }
+    ]
+  },
+  // New Picture Recognition Games
+  {
+    id: 'pictureSpeak',
+    name: 'Picture Speak',
+    nameHi: 'चित्र बोलना',
+    description: 'Speak the names of objects in pictures',
+    descriptionHi: 'चित्रों में वस्तुओं के नाम बोलें',
+    level: 1,
+    color: '#673AB7',
+    icon: 'ri-image-line',
+    phrases: [
+      { id: 1, text: "ball", textHi: "गेंद" },
+      { id: 2, text: "house", textHi: "घर" },
+      { id: 3, text: "tree", textHi: "पेड़" },
+      { id: 4, text: "car", textHi: "कार" },
+      { id: 5, text: "sun", textHi: "सूरज" }
+    ]
+  },
+  {
+    id: 'colorMatch',
+    name: 'Color Match',
+    nameHi: 'रंग मिलान',
+    description: 'Learn colors by matching objects',
+    descriptionHi: 'वस्तुओं को मिलाकर रंग सीखें',
+    level: 1,
+    color: '#F44336',
+    icon: 'ri-palette-line',
+    phrases: [
+      { id: 1, text: "red", textHi: "लाल" },
+      { id: 2, text: "blue", textHi: "नीला" },
+      { id: 3, text: "green", textHi: "हरा" },
+      { id: 4, text: "yellow", textHi: "पीला" },
+      { id: 5, text: "purple", textHi: "बैंगनी" }
+    ]
+  },
+  {
+    id: 'objectSort',
+    name: 'Object Sort',
+    nameHi: 'वस्तु छांटना',
+    description: 'Sort objects by their categories',
+    descriptionHi: 'वस्तुओं को उनकी श्रेणियों के अनुसार छांटें',
+    level: 2,
+    color: '#009688',
+    icon: 'ri-layout-grid-line',
+    phrases: [
+      { id: 1, text: "fruits", textHi: "फल" },
+      { id: 2, text: "vegetables", textHi: "सब्जियां" },
+      { id: 3, text: "animals", textHi: "जानवर" },
+      { id: 4, text: "vehicles", textHi: "वाहन" },
+      { id: 5, text: "clothes", textHi: "कपड़े" }
     ]
   }
 ];

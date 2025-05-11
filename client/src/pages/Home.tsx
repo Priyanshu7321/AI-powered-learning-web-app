@@ -7,11 +7,17 @@ import ProgressSection from '@/components/ProgressSection';
 import { games } from '@/lib/gameData';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
-import { UserProgress } from '@shared/schema';
+import { UserProgress, User } from '@shared/schema';
 
 export default function Home() {
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
-  const [userName, setUserName] = useState('Lily');
+  const [userName, setUserName] = useState('');
+
+  // Fetch user data
+  const { data: userData } = useQuery<User>({
+    queryKey: ['/api/users/me'],
+    staleTime: 60000, // 1 minute
+  });
 
   // Fetch user progress from API
   const { data: progress, isLoading } = useQuery<UserProgress>({
@@ -19,15 +25,21 @@ export default function Home() {
     staleTime: 60000, // 1 minute
   });
 
-  // Fallback progress data in case the API call hasn't completed yet
+  useEffect(() => {
+    if (userData) {
+      setUserName(userData.name);
+    }
+  }, [userData]);
+
+  // Fallback progress data with all values set to 0
   const defaultProgress: UserProgress = {
     id: 1,
     userId: 1,
-    todayStars: 15,
-    streak: 7,
-    wordsLearned: 32,
-    gamesCompleted: 12,
-    lastActive: new Date().toISOString()
+    todayStars: 0,
+    streak: 0,
+    wordsLearned: 0,
+    gamesCompleted: 0,
+    lastActive: new Date()
   };
 
   return (

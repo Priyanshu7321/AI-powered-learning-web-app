@@ -11,7 +11,7 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API routes
+ 
 
   // Auth routes
   app.post("/api/auth/login", async (req: Request, res: Response) => {
@@ -23,14 +23,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
+      // Create token with expiration (15 minutes)
+      const expirationTime = Date.now() + (15 * 60 * 1000); // 15 minutes in milliseconds
+      const token = `user_${user.id}_${expirationTime}`;
+
       // Return user data without password
       const { password: _, ...userWithoutPassword } = user;
-      res.json({ user: userWithoutPassword, token: 'user_' + user.id });
+      res.json({ user: userWithoutPassword, token });
     } catch (error) {
       res.status(500).json({ message: "Login failed" });
     }
   });
 
+  // Middleware to check token expiration
+  const checkTokenExpiration = (req: Request, res: Response, next: Function) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const [, , expirationTime] = token.split('_');
+    if (!expirationTime || Date.now() > parseInt(expirationTime)) {
+      return res.status(401).json({ message: "Token expired" });
+    }
+
+    next();
+  };
+
+  // Get current user data
+  app.get("/api/users/me", checkTokenExpiration, async (req: Request, res: Response) => {
+    try {
+      const token = req.headers.authorization?.split(' ')[1];
+      const userId = parseInt(token!.split('_')[1]);
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve user data" });
+    }
+  });
 
   app.get("/api/health", (req: Request, res: Response) => {
     res.json({ status: "ok" });
@@ -65,13 +99,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Progress routes
-  app.get("/api/progress", async (req: Request, res: Response) => {
+  app.get("/api/progress", checkTokenExpiration, async (req: Request, res: Response) => {
     try {
-      // In a real app, we would get the user ID from the session
-      const userId = 1; // Mock user ID for demo
+      const token = req.headers.authorization?.split(' ')[1];
+      const userId = parseInt(token!.split('_')[1]);
       const progress = await storage.getUserProgress(userId);
       if (!progress) {
-        // Create default progress if none exists
         const newProgress = await storage.createUserProgress({
           userId,
           todayStars: 0,
@@ -87,10 +120,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/progress", async (req: Request, res: Response) => {
+  app.put("/api/progress", checkTokenExpiration, async (req: Request, res: Response) => {
     try {
-      // In a real app, we would get the user ID from the session
-      const userId = 1; // Mock user ID for demo
+      const token = req.headers.authorization?.split(' ')[1];
+      const userId = parseInt(token!.split('_')[1]);
       const progressData = insertUserProgressSchema.parse({
         ...req.body,
         userId
@@ -141,10 +174,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/game-progress", async (req: Request, res: Response) => {
+  app.post("/api/game-progress", checkTokenExpiration, async (req: Request, res: Response) => {
     try {
-      // In a real app, we would get the user ID from the session
-      const userId = 1; // Mock user ID for demo
+      const token = req.headers.authorization?.split(' ')[1];
+      const userId = parseInt(token!.split('_')[1]);
       const { gameId, ...data } = req.body;
       
       // First check if the game progress exists
@@ -159,16 +192,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timesCompleted: data.completed ? 1 : 0,
           bestScore: data.score || 0,
           lastEvaluation: data.evaluation || null,
-          lastAttemptDate: new Date().toISOString()
+          lastAttemptDate: new Date()
         });
       } else {
         // Update existing game progress
         const updateData = {
-          timesPlayed: progress.timesPlayed + 1,
-          timesCompleted: data.completed ? progress.timesCompleted + 1 : progress.timesCompleted,
+          timesPlayed: (progress.timesPlayed || 0) + 1,
+          timesCompleted: data.completed ? (progress.timesCompleted || 0) + 1 : (progress.timesCompleted || 0),
           bestScore: data.score > (progress.bestScore || 0) ? data.score : progress.bestScore,
           lastEvaluation: data.evaluation || progress.lastEvaluation,
-          lastAttemptDate: new Date().toISOString()
+          lastAttemptDate: new Date()
         };
         
         progress = await storage.updateGameProgress(userId, gameId, updateData);
@@ -182,7 +215,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           todayStars: (userProgress.todayStars || 0) + (data.starsEarned || 0),
           wordsLearned: (userProgress.wordsLearned || 0) + (data.wordsLearned || 0),
           gamesCompleted: data.completed ? (userProgress.gamesCompleted || 0) + 1 : (userProgress.gamesCompleted || 0),
-          streak: userProgress.streak || 0
+          streak: userProgress.streak || 0,
+          lastActive: new Date()
+        });
+      } else {
+        // Create new user progress if none exists
+        await storage.createUserProgress({
+          userId,
+          todayStars: data.starsEarned || 0,
+          wordsLearned: data.wordsLearned || 0,
+          gamesCompleted: data.completed ? 1 : 0,
+          streak: 0,
+          lastActive: new Date()
         });
       }
       

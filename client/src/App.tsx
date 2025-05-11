@@ -1,4 +1,3 @@
-
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -21,6 +20,16 @@ function Router() {
     
     if (!token && currentPath !== '/signup' && currentPath !== '/login') {
       setLocation('/login');
+      return;
+    }
+
+    if (token) {
+      // Check token expiration
+      const [, , expirationTime] = token.split('_');
+      if (expirationTime && Date.now() > parseInt(expirationTime)) {
+        localStorage.removeItem('userToken');
+        setLocation('/login');
+      }
     }
   }, []);
 
@@ -33,7 +42,7 @@ function Router() {
           <Route path="/game/:gameId" component={GamePage} />
           <Route path="/progress" component={ProgressPage} />
           <Route path="/parent-dashboard" component={ParentDashboard} />
-          <Route exact path="/" component={Home} />
+          <Route path="/" component={Home} />
         </>
       ) : (
         <Route component={LoginPage} />
@@ -42,7 +51,7 @@ function Router() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router />
@@ -50,5 +59,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;

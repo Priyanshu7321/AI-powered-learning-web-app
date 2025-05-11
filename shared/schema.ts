@@ -83,3 +83,22 @@ export const testResults = pgTable("test_results", {
 export const insertTestResultSchema = createInsertSchema(testResults).omit({ id: true, completedAt: true });
 export type InsertTestResult = z.infer<typeof insertTestResultSchema>;
 export type TestResult = typeof testResults.$inferSelect;
+
+export interface Phrase {
+  id: number;
+  text: string;  // English text
+  textHi: string;  // Hindi text
+  audioUrl?: string;
+}
+
+export interface Game {
+  id: string;
+  name: string;
+  nameHi: string;
+  description: string;
+  descriptionHi: string;
+  level: number;
+  color: string;
+  icon: string;
+  phrases: Phrase[];
+}

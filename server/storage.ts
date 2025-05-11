@@ -51,59 +51,6 @@ export class MemStorage implements IStorage {
     this.progressIdCounter = 1;
     this.gameProgressIdCounter = 1;
     this.speechAttemptIdCounter = 1;
-    
-    // Initialize with demo data
-    this.initializeDemoData();
-  }
-
-  private initializeDemoData() {
-    // Create a demo user
-    const user: User = {
-      id: this.userIdCounter++,
-      username: "lily",
-      password: "password123",
-      name: "Lily",
-      age: 6,
-      language: "en",
-      parentEmail: "parent@example.com",
-      createdAt: new Date() as unknown as Date | null
-    };
-    this.users.set(user.id, user);
-    
-    // Create demo user progress
-    const progress: UserProgress = {
-      id: this.progressIdCounter++,
-      userId: user.id,
-      todayStars: 15,
-      streak: 7,
-      wordsLearned: 32,
-      gamesCompleted: 12,
-      lastActive: new Date() as unknown as Date | null
-    };
-    this.userProgress.set(user.id, progress);
-    
-    // Create demo game progress
-    const wordMatchProgress: GameProgress = {
-      id: this.gameProgressIdCounter++,
-      userId: user.id,
-      gameId: "wordMatch",
-      timesPlayed: 5,
-      timesCompleted: 3,
-      bestScore: 85,
-      lastPlayed: new Date() as unknown as Date | null
-    };
-    this.gameProgress.set(`${user.id}_wordMatch`, wordMatchProgress);
-    
-    const speakRepeatProgress: GameProgress = {
-      id: this.gameProgressIdCounter++,
-      userId: user.id,
-      gameId: "speakRepeat",
-      timesPlayed: 8,
-      timesCompleted: 6,
-      bestScore: 92,
-      lastPlayed: new Date() as unknown as Date | null
-    };
-    this.gameProgress.set(`${user.id}_speakRepeat`, speakRepeatProgress);
   }
 
   // User operations
@@ -139,10 +86,10 @@ export class MemStorage implements IStorage {
     const progress: UserProgress = {
       id,
       userId: progressData.userId,
-      todayStars: progressData.todayStars ?? null,
-      streak: progressData.streak ?? null,
-      wordsLearned: progressData.wordsLearned ?? null,
-      gamesCompleted: progressData.gamesCompleted ?? null,
+      todayStars: progressData.todayStars ?? 0,
+      streak: progressData.streak ?? 0,
+      wordsLearned: progressData.wordsLearned ?? 0,
+      gamesCompleted: progressData.gamesCompleted ?? 0,
       lastActive: new Date() as unknown as Date | null
     };
     this.userProgress.set(progressData.userId, progress);
@@ -179,10 +126,12 @@ export class MemStorage implements IStorage {
       id,
       userId: progressData.userId,
       gameId: progressData.gameId,
-      timesPlayed: progressData.timesPlayed ?? null,
-      timesCompleted: progressData.timesCompleted ?? null,
-      bestScore: progressData.bestScore ?? null,
-      lastPlayed: new Date() as unknown as Date | null
+      timesPlayed: progressData.timesPlayed ?? 0,
+      timesCompleted: progressData.timesCompleted ?? 0,
+      bestScore: progressData.bestScore ?? 0,
+      lastPlayed: new Date() as unknown as Date | null,
+      lastEvaluation: progressData.lastEvaluation ?? null,
+      lastAttemptDate: progressData.lastAttemptDate ?? null
     };
     this.gameProgress.set(`${progressData.userId}_${progressData.gameId}`, progress);
     return progress;

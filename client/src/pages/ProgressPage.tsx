@@ -66,7 +66,7 @@ export default function ProgressPage() {
 
   const t = translations[language];
 
-  // Fallback data
+  // Fallback data with all values set to 0
   const userProgress = progress || {
     id: 1,
     userId: 1,
@@ -74,7 +74,7 @@ export default function ProgressPage() {
     streak: 0,
     wordsLearned: 0,
     gamesCompleted: 0,
-    lastActive: new Date().toISOString()
+    lastActive: new Date()
   };
   
   return (
