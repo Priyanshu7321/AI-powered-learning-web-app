@@ -4,12 +4,18 @@ import { pipeline, env } from '@xenova/transformers';
 env.localModelPath = '/models'; // Store models locally
 env.allowLocalModels = true;
 env.useBrowserCache = true;
+env.backends.onnx.wasm.numThreads = 1; // Reduce thread count to prevent issues
+env.allowRemoteModels = false; // Disable remote model loading
+env.allowProgressCallback = true;
 
 class SpeechRecognitionService {
   private static instance: SpeechRecognitionService;
   private transcriber: any = null;
   private isInitialized: boolean = false;
-  private modelName = 'Xenova/whisper-small.en'; // Using a more reliable model
+  private modelName = 'Xenova/wav2vec2-base-960h'; // Using wav2vec2 model
+  private retryCount: number = 0;
+  private maxRetries: number = 3;
+  private modelPath: string = '/models/wav2vec2-base-960h';
 
   private constructor() {}
 
@@ -20,42 +26,79 @@ class SpeechRecognitionService {
     return SpeechRecognitionService.instance;
   }
 
+  private async checkModelFiles(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.modelPath}/config.json`);
+      if (!response.ok) {
+        console.error('Model config file not found');
+        return false;
+      }
+      const config = await response.json();
+      return !!config;
+    } catch (error) {
+      console.error('Error checking model files:', error);
+      return false;
+    }
+  }
+
   async initialize() {
     if (this.isInitialized) return;
 
     try {
       console.log('Starting to load speech recognition model...');
       
-      // Configure the pipeline with more options
+      // Check if model files exist locally
+      const modelExists = await this.checkModelFiles();
+      if (!modelExists) {
+        throw new Error('Model files not found locally. Please ensure the model files are present in the /models directory.');
+      }
+
       const options = {
         progress_callback: (progress: number) => {
           console.log(`Loading model: ${Math.round(progress * 100)}%`);
         },
-        quantized: true, // Use quantized model for faster loading
-        cache_dir: '/models', // Specify cache directory
-        revision: 'main', // Use main branch
-        use_cache: true // Enable caching
+        quantized: true,
+        cache_dir: this.modelPath,
+        revision: 'main',
+        use_cache: true,
+        model_type: 'wav2vec2',
+        framework: 'onnx',
+        local_files_only: true // Force using local files only
       };
 
-      // Load the model
-      this.transcriber = await pipeline(
-        'automatic-speech-recognition',
-        this.modelName,
-        options
-      );
+      while (this.retryCount < this.maxRetries) {
+        try {
+          console.log('Attempting to load model...');
+          this.transcriber = await pipeline(
+            'automatic-speech-recognition',
+            this.modelName,
+            options
+          );
+          break;
+        } catch (error) {
+          this.retryCount++;
+          console.warn(`Attempt ${this.retryCount} failed:`, error);
+          
+          if (this.retryCount === this.maxRetries) {
+            throw new Error('Failed to load model after multiple attempts. Please check if the model files are properly downloaded and accessible.');
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, this.retryCount)));
+        }
+      }
       
       this.isInitialized = true;
       console.log('Speech recognition model loaded successfully');
     } catch (error) {
       console.error('Error loading speech recognition model:', error);
-      // Try to provide more helpful error message
+      
       if (error instanceof Error) {
         if (error.message.includes('<!DOCTYPE')) {
-          console.error('Network error: Could not reach the model server. Please check your internet connection and try again.');
-          console.error('If the problem persists, try clearing your browser cache and refreshing the page.');
+          throw new Error('Network error: Could not reach the model server. Please ensure you have downloaded the model files locally.');
         } else if (error.message.includes('JSON')) {
-          console.error('Model loading error: Invalid response from server. Please try refreshing the page.');
-          console.error('If the problem persists, try using a different browser or clearing your browser cache.');
+          throw new Error('Model loading error: Invalid model files. Please ensure the model files are properly downloaded and not corrupted.');
+        } else if (error.message.includes('CORS')) {
+          throw new Error('CORS error: Please check your browser settings and ensure you have proper permissions.');
         }
       }
       throw error;
